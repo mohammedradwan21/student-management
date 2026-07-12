@@ -1,68 +1,177 @@
-function addStudent(){
+function addStudent() {
 
-let name=
-document.getElementById("name").value;
+    let name = document.getElementById("name").value;
+    let id = document.getElementById("id").value;
 
-let id=
-document.getElementById("id").value;
+    if (name === "" || id === "") {
+        alert("Fill all fields");
+        return;
+    }
 
-if(name===""||id===""){
+    let list = document.getElementById("students");
+    let item = document.createElement("li");
 
-alert("Fill all fields");
+    item.innerHTML = `
+        <span>Student: ${name} | ID: ${id}</span>
 
-return;
+        <div>
+            <button onclick="editStudent(this)">
+                Edit
+            </button>
+
+            <button onclick="removeStudent(this)">
+                Delete
+            </button>
+        </div>
+    `;
+
+    list.appendChild(item);
+
+    saveStudents();
+    updateCount();
+
+    document.getElementById("name").value = "";
+    document.getElementById("id").value = "";
+}
+
+
+function removeStudent(button) {
+
+    button.closest("li").remove();
+
+    updateCount();
+    saveStudents();
 
 }
 
-let list=
-document.getElementById("students");
 
-let item=
-document.createElement("li");
+function editStudent(button) {
 
-item.innerHTML=
-`
-Student: ${name} | ID: ${id}
-<button onclick="removeStudent(this)">
-Delete
-</button>
-`;
+    let item = button.closest("li");
 
-list.appendChild(item);
+    let text = item.querySelector("span").textContent;
 
-updateCount();
+    let studentName = text
+        .split("Student: ")[1]
+        .split(" | ID:")[0];
 
-document.getElementById("name").value="";
+    let studentId = text
+        .split("ID: ")[1];
 
-document.getElementById("id").value="";
+    let newName = prompt("Edit Student Name:", studentName);
 
-}
+    let newId = prompt("Edit Student ID:", studentId);
 
-function removeStudent(button){
+    if (newName === null || newId === null) {
+        return;
+    }
 
-button.parentElement.remove();
+    if (newName.trim() === "" || newId.trim() === "") {
+        alert("Fields cannot be empty");
+        return;
+    }
 
-updateCount();
+    item.querySelector("span").textContent =
+        `Student: ${newName} | ID: ${newId}`;
 
-}
-function updateCount(){
-
-let total=
-document.getElementById("students")
-.children.length;
-
-document.getElementById(
-"count"
-).textContent=total;
+    saveStudents();
 
 }
 
-function clearStudents(){
 
-document.getElementById(
-"students"
-).innerHTML="";
+function updateCount() {
 
-updateCount();
+    let total =
+        document.getElementById("students").children.length;
+
+    document.getElementById("count").textContent = total;
 
 }
+
+
+function clearStudents() {
+
+    document.getElementById("students").innerHTML = "";
+
+    updateCount();
+    saveStudents();
+
+}
+
+
+function saveStudents() {
+
+    let students = [];
+
+    let items =
+        document.querySelectorAll("#students li");
+
+    items.forEach(function(item) {
+
+        students.push(item.innerHTML);
+
+    });
+
+    localStorage.setItem(
+        "students",
+        JSON.stringify(students)
+    );
+
+}
+
+
+function loadStudents() {
+
+    let students =
+        JSON.parse(localStorage.getItem("students")) || [];
+
+    students.forEach(function(student) {
+
+        let item = document.createElement("li");
+
+        item.innerHTML = student;
+
+        document
+            .getElementById("students")
+            .appendChild(item);
+
+    });
+
+    updateCount();
+
+}
+
+
+function searchStudent() {
+
+    let value =
+        document
+            .getElementById("search")
+            .value
+            .toLowerCase();
+
+    let items =
+        document.querySelectorAll("#students li");
+
+    items.forEach(function(item) {
+
+        if (
+            item.textContent
+                .toLowerCase()
+                .includes(value)
+        ) {
+
+            item.style.display = "flex";
+
+        } else {
+
+            item.style.display = "none";
+
+        }
+
+    });
+
+}
+
+
+loadStudents();
